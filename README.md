@@ -20,9 +20,9 @@ Some houses appear multiple times in our data. In order to simplify exploration 
 The `bathrooms` column contained entries between 0 and 10.5, with very few entries below 1 or higher than 6. The `bedrooms` column contained entries between 0 and 13, with few entries lower than 1 or higher than 7, and the `floors` column contained entries between 1 and 4, with few entries higher than 3. The decision was made to modify these categories in order to model based on sub-samples of sufficient size. The modified values were as follows:
 
 <ul>
-    <li>`bathrooms`: 1-6</li>
-    <li>`bedrooms`: 1-7</li>
-    <li>`floors`: 1-3</li>
+    <li> Bathrooms: 1-6</li>
+    <li> Bedrooms: 1-7</li>
+    <li> Floors: 1-3</li>
 </ul>
 
 The `grade` column ranges from 1-13, but values 1-2 refer to specific small sizes of house, while value 13 refers to houses classified specifically as mansions. Thus, it was decided to squash the groups down to 1-10 with average being placed in the middle. `waterfront`, `greenbelt`, and `nuisance` columns could all be encoded as binary values (0 = No, 1 = Yes). `sewer_system`, `heat_source`, and `zipcode` were one-hot encoded, while `view`, `condition`, and `grade` were encoded both ordinally and with one-hot encoding separately. For further information, see the [notebooks](./notebooks).
@@ -56,11 +56,11 @@ Baseline Regression Coefficients   |  Baseline Regression Residual Plot
 
 The baseline model used 102 independent variables (of which 77 were zip codes which had been one-hot encoded). Of those 102 independent variables, 85 had p-values below 0.05, meaning 85 were statistically significant. The above snapshot shows a small selection of particular variables of interest, with their coefficients and their 95% confidence intervals. The model itself had an R^2 value of 0.75, indicating that 75% of the variance in the data was captured by the model. The red lines indicate the 95% prediction interval region - meaning 95% of the observed values fall within that prediction interval.
 
-The main takeaways from this model are that location is quite important, as places such as Medina (+$2.7 million) or Bellevue ($+1.9 million) have much higher house prices on average compared to the reference location of Kent (the most common zip code in our dataset). Being on the waterfront increases the value of a house by nearly $600,000 on average, while each additional square foot of living area increases price by $171.89 on average. Considering square footage is most frequently measured in the thousands, an extra 1,000 square feet of living space corresponds to an average price increase of ~$171,000. Grade of a house can significantly increase its value, an increase of one in grade produces an average price increase of $106,000. Thus, even an average house (grade 5) can be worth several hundred thousand dollars more than a low grade house (grade 3).
+The main takeaways from this model are that location is quite important, as places such as Medina (+$2.7 million) or Bellevue (+$1.9 million) have much higher house prices on average compared to the reference location of Kent (the most common zip code in our dataset). Being on the waterfront increases the value of a house by nearly $600,000 on average, while each additional square foot of living area increases price by $171.89 on average. Considering square footage is most frequently measured in the thousands, an extra 1,000 square feet of living space corresponds to an average price increase of ~$171,000. Grade of a house can significantly increase its value, an increase of one in grade produces an average price increase of $106,000. Thus, even an average house (grade 5) can be worth several hundred thousand dollars more than a low grade house (grade 3).
 
 This baseline model used all of the main features present in our data, with no columns dropped to account for multicollinearity, as discussed earlier.
 
-![](./images/prim_disc_inter_residuals.png)
+<p align = 'center'>![](./images/prim_disc_inter_residuals.png)</p>
 
 The final model used most of the main features in our data, but only the primary square footage measurements `sqft_living` and `sqft_lot`. In addition, it incorporated a great many interaction features to account for how variables such as zip code and square footage might empower or disempower one another. This model utilized 626 variables in total, of which 528 were interaction variables. For a full list of which interactions were included, see the [notebooks](./notebooks).
 
@@ -71,8 +71,7 @@ Unlike the baseline model, it is difficult to extract meaningful coefficients fr
 Multiple Linear Regression Without Interactions   |  Multiple Linear Regression With Interactions
 :-------------------------:|:-------------------------:
 ![](./images/multiple_linear_regression_no_interactions.jpg) | ![](./images/multiple_linear_regression_with_interactions.png)
-:-------------------------:|:-------------------------:
-| [Image from Stack Exchange](https://stats.stackexchange.com/questions/73320/how-to-visualize-a-fitted-multiple-regression-model) | [Image from Penn State Lecture Notes](https://online.stat.psu.edu/stat501/book/export/html/947) |
+| [Stack Exchange](https://stats.stackexchange.com/questions/73320/how-to-visualize-a-fitted-multiple-regression-model) | [Penn State Lecture Notes](https://online.stat.psu.edu/stat501/book/export/html/947) |
 
 Neither of these are graphs of our models.
 
@@ -91,44 +90,45 @@ Without a doubt, the most impactful feature of a house is its location. Choosing
 
 ## For More Information
 
-Please look at my full analysis in [Jupyter Notebooks](./notebooks) or in my [presentation](./Movie_Presentation.pdf).
+Please look at my full analysis in [Jupyter Notebooks](./notebooks) or in my [presentation](./presentation/King_County_Linear_Regression_Presentation.pdf).
 
 For any additional questions, please contact: **Joshua Gottlieb (joshuadavidgottlieb@gmail.com)**
 
 ## Repository Structure
 
 ```
-├── README.md                          <- The top-level README for reviewers of this project
-├── Movie_Presentation.pdf             <- PDF version of project presentation
+├── README.md                          <- The top-level README for reviewers of this project   
 ├── .gitignore                         <- Hidden file specifying which files to ignore
-├── notebooks                          <- Folder housing Jupyter notebooks with project code
-│   ├── EDA.ipynb                      
-│   ├── Merging_and_Cleaning.ipynb     
-│   └── Visualization.ipynb            
 ├── data                               <- Folder containing external and code-generated data
-│   ├── cleaned                        <- Folder containing cleaned data used by EDA and Visualization notebooks
-│   │   └── merged_data.parquet              
-│   ├── raw                            <- Folder containing raw files used by Merging notebook
-│   │   ├── bom.movie_gross.csv              
-│   │   ├── im.db                            
-│   │   ├── rt.movie_info.tsv                
-│   │   ├── rt.reviews.tsv                   
-│   │   ├── tmdb.movies.csv                  
-│   │   ├── tn.movie_budgets.csv             
-│   │   └── unzip.py                   <- Python script to transform zipped data into raw data
-│   └── zipped                         <- Folder containing zipped data
-│       ├── bom.movie_gross.csv.gz
-│       ├── im.db.zip
-│       ├── rt.movie_info.tsv.gz
-│       ├── rt.reviews.tsv.gz
-│       ├── tmdb.movies.csv.gz
-│       └── tn.movie_budgets.csv.gz
-└── images                             <- Folder containing images generated from code
-│   ├── change_in_roi_by_genre.png
-│   ├── distribution_of_roi_by_genre.png
-│   ├── median_roi_by_genre.png
-│   ├── runtime_and_roi.png
-│   ├── top_directors_by_genre.png
-│   └── top_writers_by_genre.png
-
+│   ├── cleaned                        <- Folder containing cleaned data used by notebooks
+│   │   ├── all_features_test.parquet
+│   │   ├── all_features_train.parquet
+│   │   ├── baseline_regression_coeff_frame.pickle
+│   │   ├── baseline_regression_y_pred.pickle
+│   │   ├── cleaned_data.parquet
+│   │   ├── primary_discrete_interactions_regression_coeff_frame.pickle
+│   │   ├── primary_discrete_interactions_y_pred.pickle
+│   │   └── removed_test_data.parquet
+│   └── raw                            <- Folder containing raw files used by Data-Cleaning notebook
+│       ├── column_names.md
+│       └── kc_house_data.csv
+├── notebooks                          <- Folder containing Jupyter notebooks with project code
+│   ├── Data-Cleaning.ipynb
+│   ├── EDA-and-Feature-Engineering.ipynb
+│   ├── Modeling.ipynb
+│   └── Visualizations.ipynb
+├── images                             <- Folder containing images generated from code and from external sources
+│   ├── baseline_coeff.png
+│   ├── baseline_residuals.png
+│   ├── correlation_heatmap.png
+│   ├── mean_price_by_zipcode.png
+│   ├── multiple_linear_regression_no_interactions.jpg
+│   ├── multiple_linear_regression_with_interactions.png
+│   ├── prim_disc_inter_residuals.png
+│   ├── removing_price_outliers.png
+│   ├── sqft_above_vs_living.png
+│   ├── sqft_living_by_zipcode.png
+│   └── sqft_living_norm_vs_log.png
+├── presentation                       <- Folder containing PDF of presentation
+│   └── King_County_Linear_Regression_Presentation.pdf
 ```
