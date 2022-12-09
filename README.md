@@ -30,26 +30,36 @@ The `grade` column ranges from 1-13, but values 1-2 refer to specific small size
 
 (Show square footage normal vs. log)
 
-The distributions of some of the continuous variables in the set are highly skewed. Log-transformations help redistribute these variables to make them more normal that may be useful during regression analysis. 
+The distributions of some of the continuous variables in the set are highly skewed. Log-transformations help redistribute these variables to make them more normal which may be useful during regression analysis. All square footage variables were kept as their nominal values, as well as log-transformed (ex: `sqft_living` and `log(sqft_living)`), as well as `price`. 
 
 (Show training price boxplot vs. cleaned training price boxplot)
 
+There are some large outliers in terms of `price` in our data set - very few houses sold for above $10,000,000, but this skews our mean price data. In theory, these houses are custom-made and are not good representations of an average property, instead being owned by the ultra-rich. Thus, houses with a `price` greater than 3 times the standard boxplot maximum value (1.5 * IQR + 75th quantile) were dropped from our data set. Records with `sqft_living` or `sqft_lot` for similar reasons. While this does mean that our model loses information about expensive houses with large square footage, this should allow us to focus on homes in a more reasonable range of parameter values that can be reproduced. 
+
 (Show correlation tables)
+
+While not all of our columns are represented in this correlation table, it can be seen that there is decently high correlation between `price` and `sqft_living`. This is understandable, as larger houses tend to sell for higher prices. `sqft_living` and `sqft_above` have very high correlation, and it seems reasonable that they may be interrelated. Interrelation between independent variables can lead to collinearity when modeling, which does not make the model invalid, but it does make interpreting coefficients more difficult.
 
 (Show correlation graph between sqft_above and sqft_living)
 
+As can be seen from this graph, `sqft_above` and `sqft_living` have a roughly linear relationship. When modeling, it would be wise to drop one of these features. In our case, `sqft_living` is a more useful feature than `sqft_above`, so we will end up dropping `sqft_above` from our more refined models.
+
 ![](./images/sqft_living_by_zipcode.png)
 
-Justify interactions
+Other correlations that were not captured by the prior correlation table include categorical variables such as `zipcode`. Realistically speaking, location of a property has a large influence on not only the value (`price`) of a property, but also many other features, such as being near water (`waterfront`) or available land space (`sqft_lot`, `sqft_living`). In order to capture these relationships between our independent variables, it is necessary to introduce what are called *interactions*. Specifically, we created a great number of first-degree interactions between our variables, which is where we allow our variables to be multiplied together. For example, to capture the interaction between `sqft_lot` and `bedrooms`, we would create a feature `sqft_lot_x_bedrooms` which consists of the lot square footage multiplied by the number of bedrooms. These interactions can help improve modeling by allowing our model to adjust the strength of one feature in the presence of another feature. For a full account of all of the interactions created for use in modeling, view the [notebooks](./notebooks).
 
 
 ## Results
 
-![](./images/baseline_residuals.png)
-![](./images/baseline_coeff.png)
+Baseline Regression Coefficients   |  Baseline Regression Residual Plot
+:-------------------------:|:-------------------------:
+![](./images/baseline_coeff.png)  |  ![](./images/baseline_residuals.png)
+
 ![](./images/prim_disc_inter_residuals.png)
 
+![](./images/multiple_linear_regression_no_interactions.jpg)
 
+![](./images/multiple_linear_regression_with_interactions.png)
 
 
 
