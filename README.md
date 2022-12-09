@@ -60,7 +60,7 @@ The main takeaways from this model are that location is quite important, as plac
 
 This baseline model used all of the main features present in our data, with no columns dropped to account for multicollinearity, as discussed earlier.
 
-<p align = 'center'>![](./images/prim_disc_inter_residuals.png)</p>
+<p align = 'center'> <img src = './images/prim_disc_inter_residuals.png'/></p>
 
 The final model used most of the main features in our data, but only the primary square footage measurements `sqft_living` and `sqft_lot`. In addition, it incorporated a great many interaction features to account for how variables such as zip code and square footage might empower or disempower one another. This model utilized 626 variables in total, of which 528 were interaction variables. For a full list of which interactions were included, see the [notebooks](./notebooks).
 
