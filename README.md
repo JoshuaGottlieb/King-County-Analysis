@@ -25,8 +25,7 @@ The `bathrooms` column contained entries between 0 and 10.5, with very few entri
     <li>`floors`: 1-3</li>
 </ul>
 
-The `grade` column ranges from 1-13, but values 1-2 refer to specific small sizes of house, while value 13 refers to houses classified specifically as mansions. Thus, it was decided to squash the groups down to 1-10 with average being placed in the middle. `waterfront`, `greenbelt`, and `nuisance` columns could all be encoded as binary values (0 = No, 1 = Yes). `sewer_system`, `heat_source`, and `zipcode` were one-hot encoded, while `view`, `condition`, and `grade` were encoded both ordinally and with one-hot encoding separately. For further information, see the [Notebooks](./notebooks).
-
+The `grade` column ranges from 1-13, but values 1-2 refer to specific small sizes of house, while value 13 refers to houses classified specifically as mansions. Thus, it was decided to squash the groups down to 1-10 with average being placed in the middle. `waterfront`, `greenbelt`, and `nuisance` columns could all be encoded as binary values (0 = No, 1 = Yes). `sewer_system`, `heat_source`, and `zipcode` were one-hot encoded, while `view`, `condition`, and `grade` were encoded both ordinally and with one-hot encoding separately. For further information, see the [notebooks](./notebooks).
 
 (Show square footage normal vs. log)
 
@@ -34,7 +33,7 @@ The distributions of some of the continuous variables in the set are highly skew
 
 (Show training price boxplot vs. cleaned training price boxplot)
 
-There are some large outliers in terms of `price` in our data set - very few houses sold for above $10,000,000, but this skews our mean price data. In theory, these houses are custom-made and are not good representations of an average property, instead being owned by the ultra-rich. Thus, houses with a `price` greater than 3 times the standard boxplot maximum value (1.5 * IQR + 75th quantile) were dropped from our data set. Records with `sqft_living` or `sqft_lot` for similar reasons. While this does mean that our model loses information about expensive houses with large square footage, this should allow us to focus on homes in a more reasonable range of parameter values that can be reproduced. 
+There are some large outliers in terms of `price` in our data set - very few houses sold for above $10,000,000, but this skews our mean price data. In theory, these houses are custom-made and are not good representations of an average property, instead being owned by the ultra-rich. Thus, houses with a `price` greater than 3 times the standard boxplot maximum value (1.5 * IQR + 75th quantile) were dropped from our data set. Records with `sqft_living` or `sqft_lot` above 3 times the standard boxplot maximum value were dropped for similar reasons. While this does mean that our model loses information about expensive houses with large square footage, this should allow us to focus on homes in a more reasonable range of parameter values that can be reproduced. 
 
 (Show correlation tables)
 
@@ -55,17 +54,39 @@ Baseline Regression Coefficients   |  Baseline Regression Residual Plot
 :-------------------------:|:-------------------------:
 ![](./images/baseline_coeff.png)  |  ![](./images/baseline_residuals.png)
 
+The baseline model used 102 independent variables (of which 77 were zip codes which had been one-hot encoded). Of those 102 independent variables, 85 had p-values below 0.05, meaning 85 were statistically significant. The above snapshot shows a small selection of particular variables of interest, with their coefficients and their 95% confidence intervals. The model itself had an R^2 value of 0.75, indicating that 75% of the variance in the data was captured by the model. The red lines indicate the 95% prediction interval region - meaning 95% of the observed values fall within that prediction interval.
+
+The main takeaways from this model are that location is quite important, as places such as Medina (+$2.7 million) or Bellevue ($+1.9 million) have much higher house prices on average compared to the reference location of Kent. Being on the waterfront increases the value of a house by nearly $600,000 on average, while each additional square foot of living area increases price by $171.89 on average. Considering square footage is most frequently measured in the thousands, an extra 1,000 square feet of living space corresponds to an average price increase of ~$171,000. Grade of a house can significantly increase its value, an increase of one in grade produces an average price increase of $106,000. Thus, even an average house (grade 5) can be worth several hundred thousand dollars more than a low grade house (grade 3).
+
+This baseline model used all of the main features present in our data, with no columns dropped to accout for multicollinearity, as discussed earlier.
+
 ![](./images/prim_disc_inter_residuals.png)
 
-![](./images/multiple_linear_regression_no_interactions.jpg)
+The final model used most of the main features in our data, but only the primary square footage measurements `sqft_living` and `sqft_lot`. In addition, it incorporated a great many interaction features to account for how variables such as zip code and square footage might empower or disempower one another. This model utilized 626 variables in total, of which 528 were interaction variables. For a full list of which interactions were included, see the [notebooks](./notebooks).
 
-![](./images/multiple_linear_regression_with_interactions.png)
+The R^2 value of this model is 0.8, a marked increase over the baseline model. As before, the red lines indicate the 95% prediction interval region. This model captures more data than the baseline, and the residuals of the uncaptured points appear to be relatively uniformly distributed above and below the line of prediction, which is a good sign that our model has not drastically violated any of the assumptions required for linear regression.
 
+Unlike the baseline model, it is difficult to extract meaningful coefficients from this model. To understand why, consider the following graphs.
 
+Multiple Linear Regression Without Interactions   |  Multiple Linear Regression With Interactions
+:-------------------------:|:-------------------------:
+![](./images/multiple_linear_regression_no_interactions.jpg) | ![](./images/multiple_linear_regression_with_interactions.png)
+:-------------------------:|:-------------------------:
+[Image from Stack Exchange](https://stats.stackexchange.com/questions/73320/how-to-visualize-a-fitted-multiple-regression-model) | [Image from Penn State Lecture Notes](https://online.stat.psu.edu/stat501/book/export/html/947)
 
+Neither of these are graphs of our models.
+
+On the left is a graph of multiple linear regression without interactions, as represented by our baseline model. The effect produced by a change in one parameter can be easily estimated by moving down the plane along the correct axis, and since the plane is uniformly increasing or decreasing along that axis, the impact of changing one parameter is clear.
+
+On the right is a graph of multiple linear regression with interactions, as represented by our final model. A change in one parameter is now dependent upon any other variables where interactions are present - the shape our model is no longer flat and uniform, so estimating the effect of a change in any particular parameter becomes messy and difficult.
+
+So, how can we use our model with interactions? This model is still useful, because given a set of input parameters (square footage, zip code, etc.), our model will give us a prediction for the sales price of that house. This can be used to compare prospective projects or upgrades, by inputting different sets of values, it is possible to compare the predicted sales prices. This model can also be used to estimate the value of houses currently on the market. By plugging in a house currently on the market, this model allows us to see if the market price is over or under the predicted sales price, allowing real estate developers to figure out which houses are over- or undervalued.
 
 ## Conclusions
 
+Housing prices are always going to be volatile and have variance, but through linear regression, it is possible to estimate the sales price of a house just from knowing its features. Our baseline model can give insights into the most impactful of these features, while our final model can be used to more accurately predict sales prices between houses in a plug and check fashion.
+
+Without a doubt, the most impactful feature of a house is its location. Choosing a zip code such as Medina (98039) versus Auburn (98092) can result in an average difference of price in the millions. When looking to maximize the value of newly built houses, it is best to choose a good zip code with higher average prices. Although related to location, building or renovating a property near the waterfront adds a lot of value to a house, regardless of size or other factors. Being near a waterfront provides an average increase in price of $600,000. The grade of a house can provide a large boost in price, with each point of grade adding $106,000 on average. It is worth noting that the higest grades are only possible with larger square footage and custom design and finish work, so there may be diminishing returns on trying to maximize grade from a building and renovating perspective. Finally, bigger houses have more value - every 1,000 square feet of living space added to a home increases its value by $172,000 on average.
 
 
 ## For More Information
